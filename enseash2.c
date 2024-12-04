@@ -10,37 +10,36 @@ int main() {
     write(STDOUT_FILENO, welcomeMsg, strlen(welcomeMsg));
 
     while (1) {
-        // Lecture de la commande utilisateur
+        // Reading the command using the "read" function
         bytesRead = read(STDIN_FILENO, buf, BUFSIZE - 1);
         if (bytesRead <= 0) {
-            perror("Erreur de lecture");  //Si la commande n'a pas pu être lu (erreur)
+            perror("Read error");  // If the command could not be read, display "Read error"
             exit(EXIT_FAILURE);
         }
 
-        // Ajout d'un caractère nul pour traiter la chaîne
-        buf[bytesRead - 1] = '\0'; // Remplace '\n' par '\0'
+        // Adding a null character to process the string
+        buf[bytesRead - 1] = '\0'; // Replaces '\n' with '\0'
 
-        // Création d'un processus enfant pour exécuter la commande
+        // Creating a child process to execute the command (with fork)
         pid_t pid = fork();
         if (pid < 0) {
-            perror("Erreur lors du fork");
+            perror("Error during fork");
             exit(EXIT_FAILURE);
         } else if (pid == 0) {
-            // Processus enfant
-            execlp(buf, buf, NULL);
-            perror("Commande non trouvée");  //Si la commande n'est pas trouvée et ne peut pas être éxécutée
+            // Child process
+            execlp(buf, buf, NULL); // Replaces the child process with the execution of the entered command ("buf")
+            perror("Command not found");  // If the command is not found or cannot be executed
             exit(EXIT_FAILURE);
         } else {
-            // Processus parent
+            // Parent process
             int status;
-            waitpid(pid, &status, 0);
+            waitpid(pid, &status, 0); // Waits for the child process to finish and retrieves its status
         }
 
-        char prompt[] = "enseash % "; // On attend de nouveau une nouvelle commande
+        char prompt[] = "enseash % "; // Waiting for a new command
         write(STDOUT_FILENO, prompt, strlen(prompt));
     }
 
     return 0;
 }
-
 

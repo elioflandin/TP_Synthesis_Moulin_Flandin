@@ -5,7 +5,7 @@
 int main() {
     char buf[BUFSIZE];
     ssize_t bytesRead;
-    int status = 0; // Status of the last executed process
+    int status = 0;
 
     char welcomeMsg[] = "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.\nenseash % ";
     write(STDOUT_FILENO, welcomeMsg, strlen(welcomeMsg));
@@ -25,6 +25,10 @@ int main() {
             break;
         }
 
+        // Mesure du temps de début
+        struct timespec start, end;
+        clock_gettime(CLOCK_MONOTONIC, &start);
+
         pid_t pid = fork();
         if (pid < 0) {
             perror("Erreur lors du fork");
@@ -36,17 +40,28 @@ int main() {
         } else {
             waitpid(pid, &status, 0);
 
-            // Analyze the process status
+            // Mesure du temps de fin
+            clock_gettime(CLOCK_MONOTONIC, &end);
+
+            // Calcul du temps d'exécution
+            long seconds = end.tv_sec - start.tv_sec;
+            long nanoseconds = end.tv_nsec - start.tv_nsec;
+            if (nanoseconds < 0) {
+                seconds--;
+                nanoseconds += 1000000000;  // Correction si les nanosecondes sont négatives
+            }
+            long elapsedTimeMs = seconds * 1000 + nanoseconds / 1000000; // Mise en millisecondes du temps
+
             char prompt[BUFSIZE];
-            if (WIFEXITED(status)) { // The process terminated normally
+            if (WIFEXITED(status)) {
                 int exitCode = WEXITSTATUS(status);
-                int promptLen = snprintf(prompt, BUFSIZE, "enseash [exit:%d] %% ", exitCode);
+                int promptLen = snprintf(prompt, BUFSIZE, "enseash [exit:%d|%ldms] %% ", exitCode, elapsedTimeMs);
                 write(STDOUT_FILENO, prompt, promptLen);
-            } else if (WIFSIGNALED(status)) { // The process terminated due to a signal
+            } else if (WIFSIGNALED(status)) {
                 int signalCode = WTERMSIG(status);
-                int promptLen = snprintf(prompt, BUFSIZE, "enseash [sign:%d] %% ", signalCode);
+                int promptLen = snprintf(prompt, BUFSIZE, "enseash [sign:%d|%ldms] %% ", signalCode, elapsedTimeMs);
                 write(STDOUT_FILENO, prompt, promptLen);
-            } else { 
+            } else {
                 char defaultPrompt[] = "enseash % ";
                 write(STDOUT_FILENO, defaultPrompt, strlen(defaultPrompt));
             }

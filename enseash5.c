@@ -25,7 +25,7 @@ int main() {
             break;
         }
 
-        // Mesure du temps de début
+        // Measure the start time
         struct timespec start, end;
         clock_gettime(CLOCK_MONOTONIC, &start);
 
@@ -40,17 +40,17 @@ int main() {
         } else {
             waitpid(pid, &status, 0);
 
-            // Mesure du temps de fin
+            // Measure the end time
             clock_gettime(CLOCK_MONOTONIC, &end);
 
-            // Calcul du temps d'exécution
+            // Calculate the execution time
             long seconds = end.tv_sec - start.tv_sec;
             long nanoseconds = end.tv_nsec - start.tv_nsec;
             if (nanoseconds < 0) {
                 seconds--;
-                nanoseconds += 1000000000;  // Correction si les nanosecondes sont négatives
+                nanoseconds += 1000000000;  // Correction if the nanoseconds are negative
             }
-            long elapsedTimeMs = seconds * 1000 + nanoseconds / 1000000; // Mise en millisecondes du temps
+            long elapsedTimeMs = seconds * 1000 + nanoseconds / 1000000; // Convert to milliseconds
 
             char prompt[BUFSIZE];
             if (WIFEXITED(status)) {
