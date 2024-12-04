@@ -5,7 +5,7 @@
 int main() {
     char buf[BUFSIZE];
     ssize_t bytesRead;
-    int status = 0; // Statut du dernier processus exécuté
+    int status = 0;
 
     char welcomeMsg[] = "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.\nenseash % ";
     write(STDOUT_FILENO, welcomeMsg, strlen(welcomeMsg));
@@ -18,6 +18,12 @@ int main() {
         }
 
         buf[bytesRead - 1] = '\0';
+
+	if (strcmp(buf, "exit") == 0) {
+            char exitMsg[] = "bye bye... !\n";
+            write(STDOUT_FILENO, exitMsg, strlen(exitMsg));
+            break;
+        }
 
         // Mesure du temps de début
         struct timespec start, end;
@@ -44,19 +50,18 @@ int main() {
                 seconds--;
                 nanoseconds += 1000000000;  // Correction si les nanosecondes sont négatives
             }
-            long elapsedTimeMs = seconds * 1000 + nanoseconds / 1000000; // Temps en millisecondes
+            long elapsedTimeMs = seconds * 1000 + nanoseconds / 1000000; // Mise en millisecondes du temps
 
-            // Analyser le statut du processus
             char prompt[BUFSIZE];
-            if (WIFEXITED(status)) { // Le processus s'est terminé normalement
+            if (WIFEXITED(status)) {
                 int exitCode = WEXITSTATUS(status);
                 int promptLen = snprintf(prompt, BUFSIZE, "enseash [exit:%d|%ldms] %% ", exitCode, elapsedTimeMs);
                 write(STDOUT_FILENO, prompt, promptLen);
-            } else if (WIFSIGNALED(status)) { // Le processus s'est terminé à cause d'un signal
+            } else if (WIFSIGNALED(status)) {
                 int signalCode = WTERMSIG(status);
                 int promptLen = snprintf(prompt, BUFSIZE, "enseash [sign:%d|%ldms] %% ", signalCode, elapsedTimeMs);
                 write(STDOUT_FILENO, prompt, promptLen);
-            } else { // Autre cas (par précaution)
+            } else {
                 char defaultPrompt[] = "enseash % ";
                 write(STDOUT_FILENO, defaultPrompt, strlen(defaultPrompt));
             }

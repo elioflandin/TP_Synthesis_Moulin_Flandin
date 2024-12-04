@@ -19,6 +19,12 @@ int main() {
 
         buf[bytesRead - 1] = '\0';
 
+	if (strcmp(buf, "exit") == 0) {
+            char exitMsg[] = "bye bye... !\n";
+            write(STDOUT_FILENO, exitMsg, strlen(exitMsg));
+            break;
+        }
+
         pid_t pid = fork();
         if (pid < 0) {
             perror("Erreur lors du fork");
