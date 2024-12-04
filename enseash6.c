@@ -19,38 +19,50 @@ int main() {
 
         buf[bytesRead - 1] = '\0';
 
-	if (strcmp(buf, "exit") == 0) {
+        if (strcmp(buf, "exit") == 0) {
             char exitMsg[] = "bye bye... !\n";
             write(STDOUT_FILENO, exitMsg, strlen(exitMsg));
             break;
         }
 
-        // Mesure du temps de début
         struct timespec start, end;
         clock_gettime(CLOCK_MONOTONIC, &start);
+
+        // Tokenize the input command to separate command and arguments
+        char *argv[BUFSIZE / 2 + 1];  // Maximum number of arguments
+        char *token = strtok(buf, " ");
+        int i = 0;
+
+        // Split the input buffer into command and arguments
+        while (token != NULL) {
+            argv[i++] = token;
+            token = strtok(NULL, " ");
+        }
+        argv[i] = NULL;  // NULL-terminate the array of arguments
 
         pid_t pid = fork();
         if (pid < 0) {
             perror("Erreur lors du fork");
             exit(EXIT_FAILURE);
         } else if (pid == 0) {
-            execlp(buf, buf, NULL);
+	    pid_t child_pid = getpid();
+	    printf("PID du processus fils : %d\n", child_pid);
+            // Execute the command with arguments
+            execlp(argv[0], argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], NULL);
             perror("Commande non trouvée");
             exit(EXIT_FAILURE);
         } else {
             waitpid(pid, &status, 0);
 
-            // Mesure du temps de fin
             clock_gettime(CLOCK_MONOTONIC, &end);
 
-            // Calcul du temps d'exécution
             long seconds = end.tv_sec - start.tv_sec;
             long nanoseconds = end.tv_nsec - start.tv_nsec;
             if (nanoseconds < 0) {
                 seconds--;
-                nanoseconds += 1000000000;  // Correction si les nanosecondes sont négatives
+                nanoseconds += 1000000000;
             }
-            long elapsedTimeMs = seconds * 1000 + nanoseconds / 1000000; // Mise en millisecondes du temps
+            long elapsedTimeMs = seconds * 1000 + nanoseconds / 1000000;
 
             char prompt[BUFSIZE];
             if (WIFEXITED(status)) {
