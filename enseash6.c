@@ -48,7 +48,7 @@ int main() {
 	    pid_t child_pid = getpid();
 	    printf("PID du processus fils : %d\n", child_pid);
             // Execute the command with arguments
-            execlp(argv[0], argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], NULL);
+            execlp(argv[0], argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], NULL); // This execlp call is limited to 8 arguments (words) including the program name.
             perror("Commande non trouvée");
             exit(EXIT_FAILURE);
         } else {
