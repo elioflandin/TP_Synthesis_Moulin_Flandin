@@ -1,11 +1,10 @@
-#include "main2.h"
-#define BUFSIZE 1096
+// main.c
+#include "main.h"
 
 int main() {
-    while(1){
-        q1();
-
-        return 0;
-    }
+    display_welcome_message();
+    handle_user_commands();
+    
+    return 0;
 }
 
